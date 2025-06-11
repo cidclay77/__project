@@ -4,6 +4,21 @@ if(!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true){
     header("location: index.php");
     exit;
 }
+
+require_once "config/database.php";
+
+// Get user role for menu display
+$user_role = 'instructor'; // default
+try {
+    $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION["id"]]);
+    $user = $stmt->fetch();
+    if($user) {
+        $user_role = $user['role'];
+    }
+} catch(PDOException $e) {
+    // Continue with default role
+}
 ?>
 
 <!DOCTYPE html>
@@ -48,11 +63,13 @@ if(!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true){
                     <i class='bx bx-certification'></i> Certificados
                 </a>
             </li>
+            <?php if($user_role === 'admin'): ?>
             <li class="nav-item">
                 <a class="nav-link" href="users/">
                     <i class='bx bx-group'></i> Usuários
                 </a>
             </li>
+            <?php endif; ?>
             <li class="nav-item mt-4">
                 <a class="nav-link" href="logout.php">
                     <i class='bx bx-log-out'></i> Sair
